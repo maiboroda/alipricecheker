@@ -3,25 +3,33 @@
 # Подключаем модули
 import requests, bs4, datetime
 
-# Создаем переменную с кодом страницы для парсинга
-url = requests.get('https://ru.aliexpress.com/item/BESDER-H-264-ONVIF-POE-48V-4CH-1080P-NVR-Recorder-P2P-Motion-Detect-Alarm-Security-Surveillance/32830343826.html')
+# Список страниц для парсинга
+with open("urllist.txt") as file:
+    urls = [row.strip() for row in file]
 
-# Создаем объект с данными из переменной
-data = bs4.BeautifulSoup(url.text, "html.parser")
+# Циклично переберем все страницы по списку
+i = 0
+while i < len(urls):
+    # Создаем переменную с кодом страницы для парсинга
+    url = requests.get(urls[i])
 
-# Описываем что нужно получить со страницы
-name_arr = data.select('#j-product-detail-bd > div.detail-main > div > h1')
-price_on_discont_arr = data.select('#j-sku-discount-price')
+    # Создаем объект с данными из переменной
+    data = bs4.BeautifulSoup(url.text, "html.parser")
 
-# Полученый результат сохраним в переменные
-name = name_arr[0].getText()
-price_on_discont = price_on_discont_arr[0].getText()
+    # Описываем что нужно получить со страницы
+    name_arr = data.select('#j-product-detail-bd > div.detail-main > div > h1')
+    price_on_discont_arr = data.select('#j-sku-discount-price')
 
-# Текущая дата и время
-now = datetime.datetime.now()
-curent_datetime = now.strftime("%d-%m-%Y %H:%M")
+    # Полученый результат сохраним в переменные
+    name = name_arr[0].getText()
+    price_on_discont = price_on_discont_arr[0].getText()
 
-# Запишем результат в файл
-f = open('result.txt', 'a', encoding='utf-8')
-f.write(curent_datetime + "|" + name + "|" + price_on_discont + "\n")
-f.close()
+    # Текущая дата и время
+    now = datetime.datetime.now()
+    curent_datetime = now.strftime("%d-%m-%Y %H:%M")
+
+    # Запишем результат в файл
+    f = open('result.txt', 'a', encoding='utf-8')
+    f.write(curent_datetime + "|" + name + "|" + price_on_discont + "\n")
+    f.close()
+    i = i + 1
